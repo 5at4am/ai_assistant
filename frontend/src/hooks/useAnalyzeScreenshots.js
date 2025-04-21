@@ -14,7 +14,7 @@ export default function useAnalyzeScreenshots() {
     setAnalyzeStatus("Sending screenshots for analysis...");
 
     try {
-      const backendBase = window.location.origin.replace(/:\d+$/, ':8000');
+      const backendBase = "https://ai-assistant-2y5y.onrender.com";
       const res = await fetch(`${backendBase}/analyze`, {
         method: "POST",
         headers: {

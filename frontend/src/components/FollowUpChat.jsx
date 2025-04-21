@@ -7,7 +7,7 @@ export default function FollowUpChat({ initialContext }) {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const backendBase = window.location.origin.replace(/:\d+$/, ":8000");
+  const backendBase = "https://ai-assistant-2y5y.onrender.com";
   const chatEndpoint = `${backendBase}/chat`;
 
   const sendMessage = async () => {

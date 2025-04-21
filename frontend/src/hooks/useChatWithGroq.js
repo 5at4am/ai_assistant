@@ -11,8 +11,7 @@ export default function useChatWithGroq() {
     setChatError(null);
 
     try {
-      const backendBase = window.location.origin.replace(/:\d+$/, ":8000");
-      const response = await fetch(`${backendBase}/chat`, {
+      const backendBase = "https://ai-assistant-2y5y.onrender.com";      const response = await fetch(`${backendBase}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt }),
