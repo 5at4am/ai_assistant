@@ -18,7 +18,11 @@ app = FastAPI()
 # Allow frontend on localhost to access backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  
+     allow_origins=[
+        "http://localhost:3000",                      # for local testing
+        "https://ai-assistant-frontend-9ksh.onrender.com",  # for production
+    "*"
+    ],  
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"]
