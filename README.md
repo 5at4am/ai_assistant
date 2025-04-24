@@ -10,7 +10,9 @@ This project is an AI Screen Assistant consisting of a backend built with Python
 - Python 3.8 or higher
 - Node.js 14 or higher
 - npm or yarn package manager
-
+- **Tesseract OCR software (Windows users)**:  
+  Download and install Tesseract OCR from [https://github.com/tesseract-ocr/tesseract](https://github.com/tesseract-ocr/tesseract).  
+  Make sure to add Tesseract to your system PATH during installation so the backend can access it.
 ---
 
 ## Backend Setup (Python)
