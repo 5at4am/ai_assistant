@@ -1,12 +1,8 @@
 # backend/app/ocr.py
 
-from paddleocr import PaddleOCR
+import pytesseract
 from PIL import Image, ImageOps
-import numpy as np
 import unicodedata
-
-# Initialize once (load model into memory)
-ocr_model = PaddleOCR(use_angle_cls=True, lang='en', use_gpu=False)
 
 def downscale_image_if_needed(image, max_width=1600):
     """Downscale large images to speed up OCR."""
@@ -17,9 +13,9 @@ def downscale_image_if_needed(image, max_width=1600):
     return image
 
 def auto_rotate_if_needed(image):
-    """Rotate if image is accidentally sideways."""
+    """Rotate if image is accidentally sideways (landscape text on portrait image)."""
     if image.height > image.width:
-        return image.rotate(270, expand=True)
+        return image.rotate(270, expand=True)  
     return image
 
 def trim_whitespace(image):
@@ -33,43 +29,46 @@ def clean_text_line(line):
 
 def process_images_to_text(image):
     """
-    OCR pipeline using PaddleOCR:
-    - Downscale, auto-rotate, trim
-    - Run OCR with layout
-    - Filter junk lines
+    Optimized OCR pipeline:
+    - Downscales
+    - Auto-rotates
+    - Trims whitespace
+    - Cleans garbage
+    - Filters out UI noise
     """
     try:
+        # Preprocessing
         image = downscale_image_if_needed(image)
         image = auto_rotate_if_needed(image)
         image = trim_whitespace(image)
 
-        # Convert to OpenCV image (numpy array)
-        img_np = np.array(image)
+        # OCR config
+        custom_config = r"--psm 6 -c preserve_interword_spaces=1"
+        raw_text = pytesseract.image_to_string(image, config=custom_config)
 
-        # Run PaddleOCR
-        results = ocr_model.ocr(img_np, cls=True)
-
-        seen = set()
+        # Cleanup
+        lines = raw_text.split("\n")
         cleaned = []
+        seen = set()
         blacklist = [
             "click", "button", "close", "share", "zoom", "subscribe", "upgrade",
             "assistant", "screen", "exit", "join", "watch", "live", "stream", "video"
         ]
 
-        for line in results[0]:
-            text = clean_text_line(line[1][0])
-            if not text:
+        for line in lines:
+            line = clean_text_line(line)
+            if not line:
                 continue
-            lower = text.lower()
-            if lower in seen:
+            lower_line = line.lower()
+            if lower_line in seen:
                 continue
-            if any(b in lower for b in blacklist):
+            if any(keyword in lower_line for keyword in blacklist):
                 continue
-            seen.add(lower)
-            cleaned.append(text)
+            seen.add(lower_line)
+            cleaned.append(line)
 
         return "\n".join(cleaned)
 
     except Exception as e:
-        print("❌ PaddleOCR failed:", e)
+        print("❌ OCR failed:", e)
         return "⚠️ OCR processing error."
